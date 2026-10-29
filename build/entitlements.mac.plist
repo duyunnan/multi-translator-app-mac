@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <!-- V8 / Node 原生模块（koffi、libsignal-client）需要 JIT 与可写可执行内存页 -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <!-- 允许加载非同一团队 ID 签名的 dylib / plugin -->
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+    <!-- Electron Framework 依赖 dyld 环境变量传递自己给 helper 进程 -->
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+    <true/>
+    <!-- 翻译 API / 各聊天平台网页 / 内置 Signal 的网络访问 -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+    <!-- 本地翻译服务监听 127.0.0.1:17890 -->
+    <key>com.apple.security.network.server</key>
+    <true/>
+    <!-- 用户手动选择的文件（拖拽图片、导入配置等） -->
+    <key>com.apple.security.files.user-selected.read-write</key>
+    <true/>
+  </dict>
+</plist>

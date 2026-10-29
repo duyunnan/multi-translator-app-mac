@@ -1,0 +1,26 @@
+{
+   "appDesc": {
+      "message": "Adicione diversas novas funcionalidades ao seu WhatsApp™ Web e aumente sua produtividade e privacidade."
+   },
+   "language_id": {
+      "message": "pt_BR"
+   },
+   "name": {
+      "message": "WhatsUp+ for WhatsApp™ Web"
+   },
+   "share_image": {
+      "message": "Compartilhar imagem no Whats Web"
+   },
+   "share_link": {
+      "message": "Compartilhar link no Whats Web"
+   },
+   "share_site": {
+      "message": "Compartilhar site no Whats Web"
+   },
+   "share_sticker": {
+      "message": "Compartilhar imagem como figurinha no Whats Web"
+   },
+   "share_text": {
+      "message": "Compartilhar texto no Whats Web"
+   }
+}

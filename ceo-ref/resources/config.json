@@ -1,0 +1,58 @@
+{
+    "1": {
+        "name": "whatsapp",
+        "version": "1.0.0"
+    },
+    "2": {
+        "name": "telegram",
+        "version": "1.0.0"
+    },
+    "3": {
+        "name": "line",
+        "version": "1.0.0"
+    },
+    "4": {
+        "name": "zalo",
+        "version": "1.0.0"
+    },
+    "5": {
+        "name": "lineWorks",
+        "version": "1.0.0"
+    },
+    "6": {
+        "name": "lineBusiness",
+        "version": "1.0.0"
+    },
+    "7": {
+        "name": "messenger",
+        "version": "1.0.0"
+    },
+    "8": {
+        "name": "metaBusiness",
+        "version": "1.0.0"
+    },
+    "9": {
+        "name": "facebook",
+        "version": "1.0.0"
+    },
+    "10": {
+        "name": "twitter",
+        "version": "1.0.0"
+    },
+    "11": {
+        "name": "tiktok",
+        "version": "1.0.0"
+    },
+    "12": {
+        "name": "telegramZh",
+        "version": "1.0.0"
+    },
+    "13": {
+        "name": "googleMessages",
+        "version": "1.0.0"
+    },
+    "14": {
+        "name": "instagram",
+        "version": "1.0.0"
+    }
+}

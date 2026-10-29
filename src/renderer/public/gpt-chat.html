@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none';" />
+  <title>对话</title>
+  <link rel="stylesheet" href="styles/gpt-chat.css" />
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <div class="app">
+    <header class="top">
+      <div class="brand-block">
+        <div class="brand" id="brand-title">对话</div>
+        <div class="brand-sub" id="model-label">连接中…</div>
+      </div>
+      <div class="top-actions">
+        <button type="button" class="btn-ghost" id="btn-clear" title="清空对话，避免上下文浪费额度">新对话</button>
+      </div>
+    </header>
+    <main class="messages" id="messages"></main>
+    <footer class="composer">
+      <div class="attach-row" id="attach-row">
+        <img class="attach-thumb" id="attach-thumb" alt="附件" />
+        <button type="button" class="attach-clear" id="attach-clear">移除</button>
+      </div>
+      <div class="input-row">
+        <textarea id="input" placeholder="输入问题；可粘贴/拖入图片" rows="3"></textarea>
+        <button type="button" id="btn-send">发送</button>
+      </div>
+      <div class="hint" id="ctx-hint">上下文约 0 条 · 仅最近几轮 + 最新图片计入请求</div>
+    </footer>
+  </div>
+  <script src="gpt-chat.js"></script>
+</body>
+</html>

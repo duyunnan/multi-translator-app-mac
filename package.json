@@ -1,0 +1,163 @@
+{
+  "name": "cyht-translator-app",
+  "productName": "财运亨通翻译器",
+  "version": "1.1.2",
+  "description": "多平台聊天实时翻译工具（WhatsApp/Telegram/Messenger/Signal/Line）",
+  "main": "./out/main/bootstrap.js",
+  "author": "multi-translator",
+  "license": "AGPL-3.0",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "start": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "dist": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac dmg zip",
+    "dist:mac:x64": "npm run build && electron-builder --mac --x64 dmg zip",
+    "dist:mac:arm64": "npm run build && electron-builder --mac --arm64 dmg zip"
+  },
+  "overrides": {
+    "@noble/hashes": "1.4.0"
+  },
+  "build": {
+    "appId": "com.multitranslator.app",
+    "productName": "财运亨通翻译器",
+    "directories": {
+      "output": "release"
+    },
+    "afterPack": "build/afterpack.js",
+    "files": [
+      "out/**/*",
+      "node_modules/koffi/**/*",
+      "node_modules/@koromix/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "node_modules/koffi/**/*",
+      "node_modules/@koromix/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "resources/extensions/line",
+        "to": "extensions/line"
+      },
+      {
+        "from": "out/main/line-mode.js",
+        "to": "line-runtime/line-mode.js"
+      },
+      {
+        "from": "build/icon_32.png",
+        "to": "icon_32.png"
+      },
+      {
+        "from": "build/icon.png",
+        "to": "icon.png"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "extraResources": [
+        {
+          "from": "resources/signal-app.asar",
+          "to": "signal-app.asar"
+        },
+        {
+          "from": "resources/signal-app.asar.unpacked",
+          "to": "signal-app.asar.unpacked"
+        }
+      ]
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.social-networking",
+      "icon": "build/icon.png",
+      "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
+      "extraResources": [
+        {
+          "from": "resources/mac",
+          "to": ".",
+          "filter": [
+            "signal-app.asar",
+            "signal-app.asar.unpacked/**"
+          ]
+        }
+      ],
+      "minimumSystemVersion": "11.0.0",
+      "darkModeSupport": true,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "extendInfo": {
+        "NSCameraUsageDescription": "翻译工具需要访问摄像头以发送图片",
+        "NSMicrophoneUsageDescription": "翻译工具需要访问麦克风以发送语音",
+        "NSPrincipalClass": "NSApplication"
+      }
+    },
+    "dmg": {
+      "window": {
+        "width": 660,
+        "height": 420
+      },
+      "contents": [
+        {
+          "x": 180,
+          "y": 210,
+          "type": "file"
+        },
+        {
+          "x": 480,
+          "y": 210,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "财运亨通翻译器"
+    }
+  },
+  "devDependencies": {
+    "electron": "^35.7.5",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^2.3.0",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.0"
+  },
+  "dependencies": {
+    "koffi": "^3.1.6",
+    "urlpattern-polyfill": "^10.1.0"
+  }
+}

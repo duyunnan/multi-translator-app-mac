@@ -1,0 +1,26 @@
+{
+   "appDesc": {
+      "message": "Tenga control total sobre su WhatsApp™ Web, con varias herramientas para aumentar su productividad y privacidad."
+   },
+   "language_id": {
+      "message": "es"
+   },
+   "name": {
+      "message": "WhatsUp+ para WhatsApp™ Web"
+   },
+   "share_image": {
+      "message": "Compartir imagen en Whats Web"
+   },
+   "share_link": {
+      "message": "Compartir enlace en Whats Web"
+   },
+   "share_site": {
+      "message": "Compartir sitio web en Whats Web"
+   },
+   "share_sticker": {
+      "message": "Comparte la imagen como una pegatina en Whats Web"
+   },
+   "share_text": {
+      "message": "Compartir texto en Whats Web"
+   }
+}

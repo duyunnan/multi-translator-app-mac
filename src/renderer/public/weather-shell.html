@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>天气</title>
+  <link rel="stylesheet" href="styles/weather-shell.css" />
+</head>
+<body>
+  <div class="sky" aria-hidden="true"></div>
+  <div class="app">
+    <header class="top">
+      <div class="brand-block">
+        <div class="brand">天气</div>
+        <div class="brand-sub">美国城市 · 实时直连</div>
+      </div>
+      <form class="search" id="search-form">
+        <input id="search-input" type="search" placeholder="洛杉矶 / Los Angeles" autocomplete="off" />
+        <button type="submit" id="btn-search">搜索</button>
+      </form>
+      <div class="cities" id="cities" role="list"></div>
+    </header>
+    <main class="result" id="result">
+      <div class="status" id="status">正在加载…</div>
+    </main>
+  </div>
+  <script src="weather-shell.js"></script>
+</body>
+</html>

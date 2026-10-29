@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: http: data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';">
+  <title>财运亨通翻译器</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Top Bar (was left sidebar) -->
+    <header id="topbar">
+      <div class="topbar-left">
+        <div class="app-logo">
+          <svg class="app-logo-mark" viewBox="0 0 32 32" width="26" height="26" aria-hidden="true">
+            <defs>
+              <linearGradient id="logoMarkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#2B7DE9"/>
+                <stop offset="100%" stop-color="#1A5BB8"/>
+              </linearGradient>
+            </defs>
+            <rect x="3" y="8" width="10" height="20" rx="3" transform="rotate(-28 8 18)" fill="url(#logoMarkGrad)"/>
+            <rect x="14" y="4" width="10" height="20" rx="3" transform="rotate(-28 19 14)" fill="#4DA3FF" opacity="0.92"/>
+          </svg>
+          <span class="app-title">财运亨通翻译器</span>
+        </div>
+        <!-- Status info (compact) -->
+        <div id="memory-info" class="memory-info-topbar">
+          <span id="memory-text" title="进程 RSS 内存占用">内存: --MB</span>
+          <span id="cpu-text" title="主进程 CPU 使用率">CPU: --%</span>
+          <span id="cache-text" title="翻译缓存条目数">缓存: --条</span>
+          <span id="hitrate-text" title="缓存命中率">命中率: --</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="nav-btn active" data-view="home" title="主页">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="currentColor"/></svg>
+        </button>
+        <button id="btn-world-clock" class="nav-btn" title="世界时间对照">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="currentColor"/></svg>
+        </button>
+        <span class="nav-sep" title=""></span>
+        <button id="btn-news" class="nav-btn" title="美国之音 VOA">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M4 4h16v2H4V4zm0 4h12v2H4V8zm0 4h16v2H4v-2zm0 4h9v2H4v-2zm11-2h5v6h-5v-6zm2 2v2h1v-2h-1z" fill="currentColor"/></svg>
+        </button>
+        <button id="btn-weather" class="nav-btn" title="天气">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 6.5a1 1 0 0 1 1 1V9a1 1 0 1 1-2 0V7.5a1 1 0 0 1 1-1zm-6.5 3a1 1 0 0 1 1 1H8a1 1 0 1 1-2 0v-1h1.5zm11 0h1.5v1a1 1 0 1 1-2 0h.5v-1zM12 12.5c1.38 0 2.5 1.12 2.5 2.5s-1.12 2.5-2.5 2.5-2.5-1.12-2.5-2.5 1.12-2.5 2.5-2.5zm-3-3.5a1 1 0 0 1 1 1v.5a1 1 0 0 1-2 0V10a1 1 0 0 1 1-1zm6 0a1 1 0 0 1 1 1v.5a1 1 0 0 1-2 0V10a1 1 0 0 1 1-1zm-6 6a1 1 0 0 1 1 1v.5a1 1 0 0 1-2 0V16a1 1 0 0 1 1-1zm6 0a1 1 0 0 1 1 1v.5a1 1 0 0 1-2 0V16a1 1 0 0 1 1-1zM12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16z" fill="currentColor"/></svg>
+        </button>
+        <button id="btn-gpt" class="nav-btn nav-btn-gpt" title="DeepSeek 对话">
+          <svg class="nav-gpt-star" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M12 2l1.6 5.2L19 9l-5.4 1.8L12 16l-1.6-5.2L5 9l5.4-1.8L12 2z" fill="currentColor"/></svg>
+          <span class="nav-gpt-label">Deepseek</span>
+        </button>
+        <button id="btn-openai" class="nav-btn nav-btn-gpt nav-btn-openai" title="OpenAI 对话">
+          <svg class="nav-openai-mark" viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M12 3l7.5 4.3v8.6L12 20.2 4.5 15.9V7.3L12 3zm0 2.3L6.5 8.6v6.9L12 18l5.5-2.5V8.6L12 5.3z" fill="currentColor"/></svg>
+          <span class="nav-gpt-label">OpenAI</span>
+        </button>
+        <span class="nav-sep" title=""></span>
+        <button class="nav-btn" data-view="settings" title="设置">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z" fill="currentColor"/></svg>
+        </button>
+        <!-- 授权登录用户（登录后常驻） -->
+        <div id="auth-chip" class="auth-chip hidden" title="当前授权账号，点击查看详情">
+          <svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z" fill="currentColor"/></svg>
+          <span id="auth-chip-name" class="auth-chip-name">--</span>
+          <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path d="M7 10l5 5 5-5z" fill="currentColor" opacity="0.8"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- World Clock Panel -->
+    <div id="world-clock-panel" class="world-clock-panel hidden">
+      <div class="world-clock-grid">
+        <div class="world-clock-card" data-tz="Asia/Shanghai">
+          <div class="world-clock-region">
+            <span class="world-clock-flag">🇨🇳</span>
+            <span class="world-clock-city">北京</span>
+          </div>
+          <div class="world-clock-time">--:--</div>
+          <div class="world-clock-date">--月--日</div>
+        </div>
+        <div class="world-clock-card" data-tz="America/Los_Angeles">
+          <div class="world-clock-region">
+            <span class="world-clock-flag">🇺🇸</span>
+            <span class="world-clock-city">洛杉矶（西海岸）</span>
+          </div>
+          <div class="world-clock-time">--:--</div>
+          <div class="world-clock-date">--月--日</div>
+        </div>
+        <div class="world-clock-card" data-tz="America/Chicago">
+          <div class="world-clock-region">
+            <span class="world-clock-flag">🇺🇸</span>
+            <span class="world-clock-city">芝加哥（中部）</span>
+          </div>
+          <div class="world-clock-time">--:--</div>
+          <div class="world-clock-date">--月--日</div>
+        </div>
+        <div class="world-clock-card" data-tz="America/New_York">
+          <div class="world-clock-region">
+            <span class="world-clock-flag">🇺🇸</span>
+            <span class="world-clock-city">纽约（东海岸）</span>
+          </div>
+          <div class="world-clock-time">--:--</div>
+          <div class="world-clock-date">--月--日</div>
+        </div>
+        <div class="world-clock-card" data-tz="Europe/London">
+          <div class="world-clock-region">
+            <span class="world-clock-flag">🇬🇧</span>
+            <span class="world-clock-city">伦敦（欧洲西部）</span>
+          </div>
+          <div class="world-clock-time">--:--</div>
+          <div class="world-clock-date">--月--日</div>
+        </div>
+        <div class="world-clock-card" data-tz="Europe/Paris">
+          <div class="world-clock-region">
+            <span class="world-clock-flag">🇪🇺</span>
+            <span class="world-clock-city">巴黎（欧洲中部）</span>
+          </div>
+          <div class="world-clock-time">--:--</div>
+          <div class="world-clock-date">--月--日</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Filter Tabs -->
+    <div id="category-tabs" class="category-tabs">
+      <div class="category-tabs-list" id="category-tabs-list">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+    <!-- Account Strip (horizontal scrollable) -->
+    <div id="account-strip" class="account-strip">
+      <div id="account-list" class="account-list-h">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main id="main-content">
+      <!-- Home/Welcome Screen -->
+      <div id="view-home" class="view active">
+        <div class="welcome-screen">
+          <h1>财运亨通翻译器</h1>
+          <p class="welcome-subtitle">多账号 WhatsApp / Telegram / Signal 翻译管理工具</p>
+          <div class="welcome-features">
+            <button type="button" class="feature-card" onclick="quickAddAccount('whatsapp')">
+              <div class="feature-icon whatsapp">
+                <svg viewBox="0 0 24 24" width="36" height="36"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" fill="#25D366"/></svg>
+              </div>
+              <h3>WhatsApp Web</h3>
+              <p>多账号隔离登录</p>
+            </button>
+            <button type="button" class="feature-card" onclick="quickAddAccount('telegram')">
+              <div class="feature-icon telegram">
+                <svg viewBox="0 0 24 24" width="36" height="36"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" fill="#2AABEE"/></svg>
+              </div>
+              <h3>Telegram Web</h3>
+              <p>多账号隔离登录</p>
+            </button>
+            <button type="button" class="feature-card" onclick="quickAddAccount('signal')">
+              <div class="feature-icon signal">
+                <svg viewBox="0 0 24 24" width="36" height="36"><path d="M12 0C5.4 0 0 5.4 0 12c0 2.1.55 4.05 1.5 5.73L.06 23.04a.5.5 0 00.62.6l5.18-1.36A11.93 11.93 0 0012 24c6.6 0 12-5.4 12-12S18.6 0 12 0zm5.37 16.77c-.22.62-1.28 1.19-1.79 1.26-.46.07-.96.1-1.5-.1-.35-.13-.79-.3-1.36-.59-2.37-1.09-3.91-3.5-4.03-3.67-.12-.17-.97-1.29-.97-2.46 0-1.17.61-1.75.83-1.99.22-.24.47-.3.63-.3.16 0 .31 0 .45.01.14.01.34-.05.53.41.2.46.67 1.64.73 1.76.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.14-.25.31-.36.42-.12.12-.24.24-.1.47.14.23.62 1.03 1.34 1.66.92.82 1.69 1.07 1.92 1.19.24.12.37.1.51-.06.14-.16.59-.69.75-.93.16-.24.31-.2.53-.12.22.08 1.38.65 1.62.77.24.12.39.18.45.28.06.1.06.57-.16 1.19z" fill="#3A76F0"/></svg>
+              </div>
+              <h3>Signal</h3>
+              <p>多开隔离 + 翻译</p>
+            </button>
+            <button type="button" class="feature-card" onclick="(function(){var b=document.querySelector('.nav-btn[data-view=settings]'); if(b) b.click();})()">
+              <div class="feature-icon translate">
+                <svg viewBox="0 0 24 24" width="36" height="36"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" fill="#F59E0B"/></svg>
+              </div>
+              <h3>实时翻译</h3>
+              <p>OpenAI 中英对照</p>
+            </button>
+          </div>
+          <div class="quick-add-buttons">
+            <button class="btn-quick-add whatsapp" onclick="quickAddAccount('whatsapp')">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" fill="white"/></svg>
+              添加 WhatsApp 账号
+            </button>
+            <button class="btn-quick-add telegram" onclick="quickAddAccount('telegram')">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" fill="white"/></svg>
+              添加 Telegram 账号
+            </button>
+            <button class="btn-quick-add signal" onclick="quickAddAccount('signal')">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 1.5c5.815 0 10.5 4.685 10.5 10.5S17.815 22.5 12 22.5 1.5 17.815 1.5 12 6.185 1.5 12 1.5zm-.75 3v2.25h1.5V4.5h-1.5zM12 7.5A4.5 4.5 0 0 0 7.5 12 4.5 4.5 0 0 0 12 16.5 4.5 4.5 0 0 0 16.5 12 4.5 4.5 0 0 0 12 7.5zm0 1.5a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3zm-.75 7.5v2.25h1.5V16.5h-1.5z" fill="white"/></svg>
+              添加 Signal 账号
+            </button>
+            <button class="btn-quick-add messenger" onclick="quickAddAccount('messenger')">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 0C5.24 0 0 4.95 0 11.64c0 3.5 1.44 6.53 3.78 8.62.2.18.32.43.32.7l.06 2.14c.02.68.72 1.13 1.35.86l2.39-1.05c.21-.09.44-.11.66-.05 1.1.3 2.27.47 3.44.47 6.76 0 12-4.95 12-11.64C24 4.95 18.76 0 12 0zm7.2 8.93l-3.52 5.59c-.56.89-1.77 1.11-2.61.48l-2.8-2.1a.72.72 0 00-.86 0l-3.78 2.87c-.5.38-1.16-.22-.82-.75l3.52-5.59c.56-.89 1.77-1.11 2.61-.48l2.8 2.1c.26.19.6.19.86 0l3.78-2.87c.5-.38 1.16.22.82.75z" fill="white"/></svg>
+              添加 Messenger 账号
+            </button>
+            <button class="btn-quick-add line" onclick="quickAddAccount('line')">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2C6.48 2 2 6.24 2 10.97c0 2.72 1.4 5.13 3.62 6.72-.08.51-.34 1.54-.56 2.07-.13.32.09.58.4.4 1.48-.82 2.82-1.71 3.3-2.07.71.17 1.47.26 2.24.26 5.52 0 10-4.23 10-7.38S17.52 2 12 2zm-.8 9.05c0 .28-.22.5-.5.5h-2.7v.75h2.42c.27 0 .5.22.5.5s-.22.5-.5.5H7.66c-.27 0-.5-.22-.5-.5V8.56c0-.28.22-.5.5-.5h3.44c.27 0 .5.22.5.5s-.22.5-.5.5H8.16v1.24h2.55c.27 0 .5.22.5.5-.01.25.01.25-.01.25zm4.1 2.03c0 .27-.22.5-.5.5s-.5-.22-.5-.5V9.06l-1.6 2.3c-.1.15-.27.24-.45.24h-.15c-.18 0-.35-.09-.45-.24l-1.6-2.3v4.02c0 .27-.22.5-.5.5s-.5-.22-.5-.5V8.56c0-.21.1-.4.27-.5.16-.11.37-.11.53 0l2.35 3.36 2.35-3.36c.16-.12.37-.12.53 0 .17.11.27.29.27.5v4.52z" fill="white"/></svg>
+              添加 LINE 账号
+            </button>
+          </div>
+          <div class="welcome-footer">
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 2l8 3v6c0 5.25-3.4 9.74-8 11-4.6-1.26-8-5.75-8-11V5l8-3zm0 2.18L6 6.3v4.7c0 4.2 2.6 7.86 6 9.02 3.4-1.16 6-4.82 6-9.02V6.3l-6-2.12zM11 7h2v6h-2V7zm0 8h2v2h-2v-2z" fill="currentColor"/></svg>
+            <span>安全隔离 · 数据保护 · 高效稳定</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings View -->
+      <div id="view-settings" class="view">
+        <div class="settings-page">
+          <h2>设置</h2>
+          <div class="settings-section">
+            <h3>翻译设置</h3>
+            <div class="setting-item">
+              <label>自动翻译</label>
+              <label class="switch">
+                <input type="checkbox" id="auto-translate">
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-item">
+              <label>目标语言</label>
+              <select id="target-lang">
+                <option value="zh-CN" selected>简体中文</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label>发送翻译语言</label>
+              <select id="send-target-lang" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+                <option value="en" selected>英语 (English)</option>
+                <option value="zh-CN">简体中文</option>
+                <option value="zh-TW">繁体中文</option>
+                <option value="ja">日语 (日本語)</option>
+                <option value="ko">韩语 (한국어)</option>
+                <option value="de">德语 (Deutsch)</option>
+                <option value="es">西班牙语 (Español)</option>
+                <option value="ar">阿拉伯语 (العربية)</option>
+                <option value="ru">俄语 (Русский)</option>
+                <option value="fr">法语 (Français)</option>
+                <option value="pt">葡萄牙语 (Português)</option>
+                <option value="it">意大利语 (Italiano)</option>
+                <option value="th">泰语 (ไทย)</option>
+                <option value="vi">越南语 (Tiếng Việt)</option>
+                <option value="id">印尼语 (Bahasa Indonesia)</option>
+                <option value="tr">土耳其语 (Türkçe)</option>
+                <option value="hi">印地语 (हिन्दी)</option>
+                <option value="nl">荷兰语 (Nederlands)</option>
+                <option value="pl">波兰语 (Polski)</option>
+                <option value="uk">乌克兰语 (Українська)</option>
+              </select>
+              <span style="font-size:11px;opacity:.6;white-space:nowrap;margin-left:6px">输入中文发送时译成的语言</span>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>默认方案</h3>
+            <p style="font-size:12px;opacity:.7;line-height:1.6;margin:4px 0 10px">
+              默认翻译引擎选择 Google 时，Google 失败会自动切换到下方「智能回复引擎」的 AI 兜底；选择 OpenAI / DeepSeek 时直接使用该引擎，不再等待 Google。所有输出均为简体中文。
+            </p>
+            <div class="setting-item">
+              <label>默认翻译引擎</label>
+              <select id="translate-engine" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+                <option value="google">Google（推荐）</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="openai">OpenAI</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label>智能回复引擎</label>
+              <select id="ai-provider" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+                <option value="deepseek">DeepSeek</option>
+                <option value="openai">OpenAI</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>DeepSeek（翻译兜底 / 智能回复）</h3>
+            <div class="setting-item">
+              <label>DeepSeek API Key</label>
+              <input type="password" id="deepseek-api-key" placeholder="sk-..." style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+            </div>
+            <div class="setting-item">
+              <label>DeepSeek Base URL</label>
+              <input type="text" id="deepseek-base-url" placeholder="https://api.deepseek.com/v1" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+            </div>
+            <div class="setting-item">
+              <label>模型</label>
+              <input type="text" id="deepseek-model" placeholder="deepseek-chat" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+            </div>
+            <div class="setting-item setting-actions">
+              <button class="btn-secondary" onclick="saveDeepSeekConfig()">保存 DeepSeek</button>
+              <button class="btn-secondary" onclick="testDeepSeekConnection()" style="margin-left:8px">测试连接</button>
+              <span id="deepseek-config-status" class="config-status"></span>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>OpenAI（翻译兜底 / 智能回复）</h3>
+            <div class="setting-item">
+              <label>OpenAI API Key</label>
+              <input type="password" id="openai-api-key" placeholder="sk-..." style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+            </div>
+            <div class="setting-item">
+              <label>OpenAI Base URL</label>
+              <input type="text" id="openai-base-url" placeholder="https://api.openai.com" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+            </div>
+            <div class="setting-item">
+              <label>翻译模型</label>
+              <input type="text" id="openai-model" placeholder="gpt-4o-mini" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+            </div>
+            <div class="setting-item">
+              <label>SOCKS5 代理</label>
+              <input type="text" id="openai-proxy" placeholder="127.0.0.1:1080（留空自动检测）" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+            </div>
+            <div class="setting-item">
+              <label>代理用户名</label>
+              <input type="text" id="openai-proxy-username" placeholder="username" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+            </div>
+            <div class="setting-item">
+              <label>代理密码</label>
+              <input type="password" id="openai-proxy-password" placeholder="password" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+            </div>
+            <div class="setting-item">
+              <label>自动检测代理</label>
+              <label class="switch">
+                <input type="checkbox" id="openai-proxy-autodetect" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="setting-item setting-actions">
+              <button class="btn-secondary" onclick="saveOpenAIConfig()">保存 OpenAI / SOCKS5</button>
+              <button class="btn-secondary" onclick="testOpenAIConnection()" style="margin-left:8px">测试连接</button>
+              <button class="btn-secondary" onclick="testProxyConnection()" style="margin-left:8px">测试代理</button>
+              <span id="openai-config-status" class="config-status"></span>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>语音识别</h3>
+            <div class="setting-item">
+              <label>STT 模型</label>
+              <input type="text" id="stt-model" placeholder="whisper-1" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+            </div>
+            <div class="setting-item">
+              <label>STT API Key</label>
+              <input type="password" id="stt-openai-key" placeholder="sk-..." style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+            </div>
+            <div class="setting-item setting-actions">
+              <button class="btn-secondary" onclick="saveSttConfig()">保存语音识别设置</button>
+              <span id="stt-config-status" class="config-status"></span>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>译文显示</h3>
+            <p style="font-size:12px;opacity:.7;line-height:1.6;margin:4px 0 10px">
+              调整 WhatsApp / Telegram / Messenger 消息下方翻译徽章的字体大小、颜色和背景色。保存后立即对所有已打开账号生效。
+            </p>
+            <div class="setting-item">
+              <label>字体大小</label>
+              <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+                <input type="range" id="translation-font-size" min="10" max="24" value="14" style="flex:1">
+                <span id="translation-font-size-value" style="min-width:42px;font-size:13px">14px</span>
+              </div>
+            </div>
+            <div class="setting-item">
+              <label>字体颜色</label>
+              <select id="translation-font-color" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+                <option value="#1a237e">深蓝色 (默认)</option>
+                <option value="#000000">黑色</option>
+                <option value="#212121">深灰色</option>
+                <option value="#424242">灰色</option>
+                <option value="#ffffff">白色</option>
+                <option value="#d32f2f">红色</option>
+                <option value="#388e3c">绿色</option>
+                <option value="#1976d2">蓝色</option>
+              </select>
+            </div>
+            <div class="setting-item">
+              <label>背景颜色</label>
+              <select id="translation-bg-color" style="flex:1;min-width:0;padding:6px 8px;border-radius:6px;border:1px solid #3a3a3a;background:#1e1e1e;color:#eee">
+                <option value="rgba(232,244,255,0.95)">浅蓝色 (默认)</option>
+                <option value="rgba(245,245,245,0.95)">浅灰色</option>
+                <option value="rgba(255,255,255,0.95)">白色</option>
+                <option value="rgba(232,245,233,0.95)">浅绿色</option>
+                <option value="rgba(255,235,238,0.95)">浅红色</option>
+                <option value="rgba(232,234,246,0.95)">浅紫色</option>
+                <option value="rgba(255,243,224,0.95)">浅橙色</option>
+                <option value="transparent">透明</option>
+              </select>
+            </div>
+            <div class="setting-item setting-actions">
+              <button class="btn-secondary" onclick="saveFontConfig()">保存字体设置</button>
+              <span id="font-config-status" class="config-status"></span>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>通知设置</h3>
+            <div class="setting-item">
+              <label>桌面通知</label>
+              <label class="switch">
+                <input type="checkbox" id="desktop-notifications" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>内存管理</h3>
+            <div class="setting-item">
+              <label>当前内存使用</label>
+              <span id="settings-memory">--MB</span>
+            </div>
+            <div class="setting-item">
+              <button class="btn-secondary" onclick="clearAllCaches()">清理所有缓存</button>
+            </div>
+          </div>
+          <!-- ===== 性能监控面板 ===== -->
+          <div class="settings-section perf-monitor-section">
+            <h3>⚡ 性能监控 <span style="font-size:11px;opacity:.6;font-weight:normal">(每 5s 自动更新)</span></h3>
+            <!-- 进度条 -->
+            <div class="perf-bar-group">
+              <div class="perf-bar-label">CPU</div>
+              <div class="perf-bar-track"><div id="perf-cpu-bar" class="perf-bar-fill" style="width:0%"></div></div>
+              <span id="perf-cpu" class="perf-bar-val">CPU: 0%</span>
+            </div>
+            <div class="perf-bar-group">
+              <div class="perf-bar-label">内存</div>
+              <div class="perf-bar-track"><div id="perf-mem-bar" class="perf-bar-fill" style="width:0%"></div></div>
+              <span id="perf-rss" class="perf-bar-val">RSS: 0MB</span>
+            </div>
+            <!-- 详细指标 -->
+            <div class="perf-detail-grid">
+              <div class="perf-cell"><span class="perf-label">堆内存</span><span id="perf-heap">0/0MB</span></div>
+              <div class="perf-cell"><span class="perf-label">外部内存</span><span id="perf-external">0MB</span></div>
+              <div class="perf-cell"><span class="perf-label">事件循环延迟</span><span id="perf-el-lag">0ms</span></div>
+              <div class="perf-cell"><span class="perf-label">进程数</span><span id="perf-proc-count">0</span></div>
+              <div class="perf-cell"><span class="perf-label">总内存</span><span id="perf-total-mem">0MB</span></div>
+            </div>
+            <!-- 子进程列表 -->
+            <div style="margin-top:8px">
+              <div style="font-size:12px;opacity:.7;margin-bottom:4px">子进程详情</div>
+              <table id="perf-process-table" class="perf-proc-table">
+                <tr style="opacity:.7"><th>PID</th><th>类型</th><th>CPU</th><th>内存</th></tr>
+                <tr><td colspan="4" style="text-align:center;opacity:.5">等待数据...</td></tr>
+              </table>
+            </div>
+            <!-- 导出 -->
+            <div style="margin-top:10px">
+              <button class="btn-secondary" onclick="exportPerfHistory()" title="复制最近5分钟的性能快照(JSON)到剪贴板">📋 导出性能历史</button>
+              <span style="font-size:11px;opacity:.5;margin-left:6px">复制到剪贴板，可离线分析</span>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h3>语音翻译</h3>
+            <p style="font-size:12px;opacity:.7;line-height:1.6;margin:4px 0 10px">
+              短语音会自动识别英语、粤语（广东话）及其他欧洲语言，再统一翻译成自然的简体中文。
+            </p>
+          </div>
+          <div class="settings-section">
+            <h3>关于</h3>
+            <p>财运亨通翻译器 <span id="app-version" style="color:#4fc3f7">v—</span></p>
+            <p>多账号 WhatsApp / Telegram / Signal / Messenger / LINE 翻译管理工具</p>
+            <p>专为 Windows 10/11 设计</p>
+            <div class="setting-item" style="margin-top:6px">
+              <span>软件更新</span>
+              <button class="btn-secondary" id="btn-check-update" onclick="checkUpdateNow()">检查更新</button>
+            </div>
+            <p id="update-status-line" style="font-size:12px;opacity:.8;margin:4px 0 0"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Webview Container (dynamically managed) -->
+      <div id="webview-container" class="webview-container">
+        <!-- webviews are created dynamically -->
+      </div>
+    </main>
+
+    <!-- Translation Panel (slide-in) -->
+    <div id="translation-panel" class="translation-panel hidden">
+      <div class="translation-panel-header">
+        <h3>翻译面板</h3>
+        <button class="btn-icon" onclick="toggleTranslationPanel()">
+          <svg viewBox="0 0 24 24" width="18" height="18"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/></svg>
+        </button>
+      </div>
+      <div class="translation-panel-body">
+        <div class="translation-input-group">
+          <label>原文</label>
+          <textarea id="translate-input" placeholder="输入或粘贴要翻译的文本..." rows="4"></textarea>
+        </div>
+        <button class="btn-translate" onclick="doManualTranslate()">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" fill="currentColor"/></svg>
+          翻译
+        </button>
+        <div class="translation-output-group">
+          <label>译文 (简体中文)</label>
+          <div id="translate-output" class="translate-output">翻译结果将显示在这里...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Account Modal -->
+    <div id="modal-add-account" class="modal hidden">
+      <div class="modal-overlay" onclick="closeAddAccountModal()"></div>
+      <div class="modal-content">
+        <h3>添加新账号</h3>
+        <div class="form-group">
+          <label>账号名称</label>
+          <input type="text" id="input-account-name" placeholder="输入账号名称（可选）">
+        </div>
+        <div class="form-group">
+          <label>平台类型</label>
+          <div class="platform-selector">
+            <button class="platform-btn selected" data-type="whatsapp" onclick="selectPlatform('whatsapp')">
+              <svg viewBox="0 0 24 24" width="24" height="24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" fill="#25D366"/></svg>
+              <span>WhatsApp</span>
+            </button>
+            <button class="platform-btn" data-type="telegram" onclick="selectPlatform('telegram')">
+              <svg viewBox="0 0 24 24" width="24" height="24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" fill="#2196F3"/></svg>
+              <span>Telegram</span>
+            </button>
+            <button class="platform-btn" data-type="signal" onclick="selectPlatform('signal')">
+              <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 1.5c5.815 0 10.5 4.685 10.5 10.5S17.815 22.5 12 22.5 1.5 17.815 1.5 12 6.185 1.5 12 1.5zm-.75 3v2.25h1.5V4.5h-1.5zM12 7.5A4.5 4.5 0 0 0 7.5 12 4.5 4.5 0 0 0 12 16.5 4.5 4.5 0 0 0 16.5 12 4.5 4.5 0 0 0 12 7.5zm0 1.5a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3zm-.75 7.5v2.25h1.5V16.5h-1.5z" fill="#3A76F0"/></svg>
+              <span>Signal</span>
+            </button>
+            <button class="platform-btn" data-type="messenger" onclick="selectPlatform('messenger')">
+              <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 0C5.24 0 0 4.95 0 11.64c0 3.5 1.44 6.53 3.78 8.62.2.18.32.43.32.7l.06 2.14c.02.68.72 1.13 1.35.86l2.39-1.05c.21-.09.44-.11.66-.05 1.1.3 2.27.47 3.44.47 6.76 0 12-4.95 12-11.64C24 4.95 18.76 0 12 0zm7.2 8.93l-3.52 5.59c-.56.89-1.77 1.11-2.61.48l-2.8-2.1a.72.72 0 00-.86 0l-3.78 2.87c-.5.38-1.16-.22-.82-.75l3.52-5.59c.56-.89 1.77-1.11 2.61-.48l2.8 2.1c.26.19.6.19.86 0l3.78-2.87c.5-.38 1.16.22.82.75z" fill="#0084FF"/></svg>
+              <span>Messenger</span>
+            </button>
+            <button class="platform-btn" data-type="line" onclick="selectPlatform('line')">
+              <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 2C6.48 2 2 6.24 2 10.97c0 2.72 1.4 5.13 3.62 6.72-.08.51-.34 1.54-.56 2.07-.13.32.09.58.4.4 1.48-.82 2.82-1.71 3.3-2.07.71.17 1.47.26 2.24.26 5.52 0 10-4.23 10-7.38S17.52 2 12 2zm-.8 9.05c0 .28-.22.5-.5.5h-2.7v.75h2.42c.27 0 .5.22.5.5s-.22.5-.5.5H7.66c-.27 0-.5-.22-.5-.5V8.56c0-.28.22-.5.5-.5h3.44c.27 0 .5.22.5.5s-.22.5-.5.5H8.16v1.24h2.55c.27 0 .5.22.5.5-.01.25.01.25-.01.25zm4.1 2.03c0 .27-.22.5-.5.5s-.5-.22-.5-.5V9.06l-1.6 2.3c-.1.15-.27.24-.45.24h-.15c-.18 0-.35-.09-.45-.24l-1.6-2.3v4.02c0 .27-.22.5-.5.5s-.5-.22-.5-.5V8.56c0-.21.1-.4.27-.5.16-.11.37-.11.53 0l2.35 3.36 2.35-3.36c.16-.12.37-.12.53 0 .17.11.27.29.27.5v4.52z" fill="#06C755"/></svg>
+              <span>LINE</span>
+            </button>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeAddAccountModal()">取消</button>
+          <button class="btn-primary" onclick="confirmAddAccount()">确认添加</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rename Account Modal -->
+    <div id="modal-rename-account" class="modal hidden">
+      <div class="modal-overlay" onclick="closeRenameModal()"></div>
+      <div class="modal-content">
+        <h3>重命名账号</h3>
+        <div class="form-group">
+          <label>账号名称</label>
+          <input type="text" id="input-rename-name" placeholder="输入新的账号名称">
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeRenameModal()">取消</button>
+          <button class="btn-primary" onclick="confirmRename()">确认重命名</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 授权账号信息下拉 -->
+    <div id="auth-pop" class="auth-pop hidden">
+      <div class="auth-pop-head">
+        <div class="auth-pop-avatar">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z" fill="currentColor"/></svg>
+        </div>
+        <div class="auth-pop-id">
+          <div id="auth-pop-username" class="auth-pop-username">--</div>
+          <div id="auth-pop-status" class="auth-pop-status ok">--</div>
+        </div>
+      </div>
+      <div class="auth-pop-row">
+        <span class="auth-pop-label">到期时间</span>
+        <span id="auth-pop-expire" class="auth-pop-value">--</span>
+      </div>
+      <div class="auth-pop-row">
+        <span class="auth-pop-label">剩余天数</span>
+        <span id="auth-pop-days" class="auth-pop-value">--</span>
+      </div>
+      <button id="auth-pop-logout" class="auth-pop-logout">退出登录</button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Login Gate：未登录时全屏遮罩，登录后才可进入软件 -->
+    <div id="login-gate" class="login-gate hidden">
+      <div class="login-box">
+        <div class="login-logo">
+          <svg viewBox="0 0 24 24" width="52" height="52"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#fff"/></svg>
+        </div>
+        <h1 class="login-title">财运亨通翻译器</h1>
+        <p class="login-sub">登录后即可使用软件</p>
+        <div class="login-fields">
+          <input type="text" id="login-username" class="login-input" placeholder="用户名" autocomplete="username" spellcheck="false">
+          <input type="password" id="login-password" class="login-input" placeholder="密码" autocomplete="current-password">
+        </div>
+        <div id="login-msg" class="login-msg hidden"></div>
+        <button id="login-submit" class="login-submit">登 录</button>
+        <button id="login-settings-open" class="login-settings-open">
+          <svg viewBox="0 0 24 24" width="14" height="14"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.05-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96a.484.484 0 0 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z" fill="currentColor"/></svg>
+          <span>服务器设置</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Auth Server Config Modal -->
+    <div id="modal-auth-config" class="modal hidden">
+      <div class="modal-overlay" onclick="closeAuthConfigModal()"></div>
+      <div class="modal-content">
+        <h3>服务器设置</h3>
+        <div class="form-group">
+          <label>API 地址</label>
+          <input type="text" id="input-auth-host" placeholder="服务器 API 地址（IP 或域名）">
+        </div>
+        <div class="form-group">
+          <label>端口</label>
+          <input type="number" id="input-auth-port" placeholder="端口号">
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="closeAuthConfigModal()">取消</button>
+          <button class="btn-primary" onclick="saveAuthConfig()">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Update Modal：发现新版本 / 下载进度 / 校验完成可安装 -->
+    <div id="modal-update" class="modal hidden">
+      <div class="modal-overlay" onclick="closeUpdateModal()"></div>
+      <div class="modal-content" style="max-width:520px">
+        <h3 id="update-modal-title">软件更新</h3>
+        <p id="update-version-line" style="font-size:13px;margin:0 0 8px;opacity:.9"></p>
+        <div id="update-release-notes" style="font-size:12px;line-height:1.7;color:#e6e6e6;white-space:pre-wrap;max-height:170px;overflow:auto;background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:10px 12px"></div>
+        <div id="update-progress-wrap" style="display:none;margin-top:12px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+            <span id="update-progress-label">正在下载更新…</span>
+            <span id="update-progress-text">0%</span>
+          </div>
+          <div style="height:6px;border-radius:3px;background:#333;overflow:hidden">
+            <div id="update-progress-fill" style="height:100%;width:0%;background:linear-gradient(90deg,#1a73e8,#4285f4);transition:width .15s"></div>
+          </div>
+        </div>
+        <p id="update-message" style="font-size:12px;margin:10px 0 0;color:#ffb74d"></p>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="update-later-btn" onclick="closeUpdateModal()">稍后再说</button>
+          <button class="btn-primary" id="update-primary-btn" onclick="updatePrimaryAction()">立即下载</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+appId: com.skyscrm.app
+productName: SKY-SCRM
+protocols:
+    - name: SKY-SCRM
+      schemes:
+          - skyscrmapp
+afterAllArtifactBuild: build/notarize-artifacts.js
+extraMetadata:
+    version: 1.9.5
+directories:
+    buildResources: build
+files:
+    - '!**/.vscode/*'
+    - '!src/*'
+    - '!electron.vite.config.{js,ts,mjs,cjs}'
+    - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+    - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+    - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+    - "!**/node_modules/**/{test,__tests__,tests}/**"
+    - "!**/node_modules/**/example*/**"
+    - "!**/node_modules/.bin"
+    - "!**/node_modules/**/docs*/**"
+    - "!**/node_modules/**/README.md"
+    - '!**/*.map'
+asarUnpack:
+    - 'node_modules/better-sqlite3'
+    - 'resources/**'
+    - '!resources/ceo/**'
+    - 'out/main/mainWorker.js'
+win:
+    icon: resources/sky/icon.ico
+    executableName: SKY-SCRM
+    verifyUpdateCodeSignature: false
+    target:
+        - target: default
+          arch: x64  # 推荐64位架构
+    sign: build/sign-app.js
+nsis:
+    artifactName: ${name}-${version}-setup.${ext}
+    shortcutName: ${productName}
+    uninstallDisplayName: ${productName}
+    createDesktopShortcut: always
+    installerIcon: resources/sky/favicon.ico
+    uninstallerIcon: resources/sky/favicon.ico
+    installerHeaderIcon: resources/sky/favicon.ico
+    createStartMenuShortcut: true
+    perMachine: false
+    oneClick: false       # 必须为 false，才能弹出安装向导界面
+    allowToChangeInstallationDirectory: true  # 👈 关键：允许用户自定义安装路径
+    allowElevation: true
+mac:
+    icon: resources/sky/icon.png
+    hardenedRuntime: true
+    gatekeeperAssess: false
+    target:
+        - target: zip
+        - target: dmg
+    entitlements: build/entitlements.mac.plist
+    entitlementsInherit: build/entitlements.mac.plist
+    extendInfo:
+        -   NSCameraUsageDescription: Application requests access to the device's camera.
+        -   NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+        -   NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+        -   NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+artifactName: ${name}-${version}-${arch}.${ext}
+dmg:
+    artifactName: ${name}-${version}-${arch}.${ext}  # 添加 ${arch} 变量以区分架构
+linux:
+    target:
+        - AppImage
+        - snap
+        - deb
+    maintainer: electronjs.org
+    category: Utility
+appImage:
+    artifactName: ${name}-${version}.${ext}
+npmRebuild: true
+publish:
+    provider: generic
+    url: ''
+electronDist: /Users/apple/Documents/works/chatw-scrm-ts/node_modules/electron/dist
+#electronDist: D:/work/chatw-scrm-ts/node_modules/electron/dist
+electronVersion: 22.3.27

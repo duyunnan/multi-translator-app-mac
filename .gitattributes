@@ -1,0 +1,21 @@
+# 仓库内统一按 LF 存储，避免 Windows 开发机把换行写死成 CRLF
+* text=auto eol=lf
+
+# shell 脚本必须是 LF：mac 上 CRLF 会导致
+#   /bin/bash^M: bad interpreter: No such file or directory
+*.sh text eol=lf
+
+# 二进制资源不做任何换行转换
+*.asar binary
+*.png binary
+*.ico binary
+*.icns binary
+*.zip binary
+*.node binary
+*.dll binary
+*.dylib binary
+
+# 内置 Signal 的 asar 与 unpacked 原生模块一律按二进制处理：
+# 这些文件来自官方 Signal，字节必须原样保留，任何换行转换都可能
+# 破坏原生模块加载或 asar 内部校验。（放在最后，覆盖上面 * text=auto 规则）
+resources/** binary

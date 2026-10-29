@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notification</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="toast" id="toast">
+    <div class="toast__content">
+      <p class="toast__title" id="title"></p>
+      <p class="toast__message" id="message"></p>
+    </div>
+    <button class="toast__close" id="closeBtn" type="button" aria-label="Close notification">&times;</button>
+    <div class="toast__timer" id="timerBar">
+      <div class="toast__timer-fill" id="timerFill"></div>
+    </div>
+  </main>
+  <script src="./renderer.js"></script>
+</body>
+</html>

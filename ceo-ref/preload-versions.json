@@ -1,0 +1,18 @@
+{
+  "index": { "version": "1.0.1", "updatedAt": "2026-02-18" },
+  "whatsapp": { "version": "1.2.11", "updatedAt": "2026-08-12" },
+  "telegram": { "version": "1.2.15", "updatedAt": "2026-08-19" },
+  "line": { "version": "1.2.2", "updatedAt": "2026-07-20" },
+  "zalo": { "version": "1.0.7", "updatedAt": "2026-07-20" },
+  "lineWorks": { "version": "1.0.7", "updatedAt": "2026-07-20" },
+  "lineBusiness": { "version": "1.1.1", "updatedAt": "2026-07-20" },
+  "messenger": { "version": "1.0.9", "updatedAt": "2026-07-20" },
+  "metaBusiness": { "version": "1.0.10", "updatedAt": "2026-07-20" },
+  "facebook": { "version": "1.0.9", "updatedAt": "2026-07-20" },
+  "twitter": { "version": "1.0.7", "updatedAt": "2026-08-14" },
+  "tiktok": { "version": "1.0.10", "updatedAt": "2026-07-20" },
+  "telegramZh": { "version": "1.2.4", "updatedAt": "2026-07-20" },
+  "googleMessages": { "version": "1.0.9", "updatedAt": "2026-07-24" },
+  "instagram": { "version": "1.0.8", "updatedAt": "2026-07-20" },
+  "signal": { "version": "1.0.2", "updatedAt": "2026-08-19" }
+}
