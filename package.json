@@ -21,6 +21,9 @@
       "@noble/hashes": "1.4.0"
     }
   },
+  "engines": {
+    "node": ">=20.19.0"
+  },
   "build": {
     "appId": "com.multitranslator.app",
     "productName": "财运亨通翻译器",

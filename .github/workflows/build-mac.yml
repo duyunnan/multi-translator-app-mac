@@ -38,7 +38,10 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # 必须 22（或 20.19+）：app-builder-lib 用 require() 加载 @noble/hashes/2.x，
+          # 而 2.x 是纯 ESM，只有 Node 20.19+/22+ 的 require(esm) 支持才不会
+          # 报 ERR_REQUIRE_ESM。这里直接锁 LTS 22，避免解析到较老的 20.x。
+          node-version: 22
           cache: npm
 
       - name: 安装依赖（koffi 原生模块需在此编译）
