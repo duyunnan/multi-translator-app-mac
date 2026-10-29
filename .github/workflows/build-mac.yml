@@ -73,6 +73,22 @@ jobs:
           if [ -z "${CSC_LINK:-}" ]; then
             echo "未配置签名证书，走 ad-hoc 签名"
             echo "signed=false" >> "$GITHUB_ENV"
+            # ad-hoc 签名且 hardenedRuntime=false 时，必须去掉 entitlements：
+            # build/entitlements.mac.plist 里全是 com.apple.security.cs.* 这类
+            # "hardened runtime 专用" entitlement，非 runtime 签名下 codesign 会直接
+            # 拒绝（invalid entitlement）。正式签名（有证书 + hardenedRuntime=true）时
+            # 才用得上，这里只在 CI 工作区里临时改，不改动仓库。
+            node -e '
+              const fs = require("fs");
+              const p = JSON.parse(fs.readFileSync("package.json", "utf8"));
+              const m = p.build && p.build.mac;
+              if (m && (m.entitlements || m.entitlementsInherit)) {
+                delete m.entitlements;
+                delete m.entitlementsInherit;
+                fs.writeFileSync("package.json", JSON.stringify(p, null, 2) + "\n");
+                console.log("已临时移除 mac entitlements（ad-hoc 非 hardened 签名）");
+              }
+            '
             exit 0
           fi
           security create-keychain -p "$CSC_KEYCHAIN_PASSWORD" "$CSC_KEYCHAIN"
@@ -97,10 +113,16 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: npx electron-builder --mac --arm64 dmg zip
+        # tee 保存完整日志：Actions 的运行日志需要登录才能下载，
+        # 失败时把它作为 artifact 传上来，便于直接排错
+        run: |
+          mkdir -p release
+          npx electron-builder --mac --arm64 dmg zip 2>&1 | tee build-arm64.log
 
       - name: 准备 Rosetta（x64 交叉构建用）
         if: github.event.inputs.arch != 'arm64'
+        # Rosetta 装不上多半是 runner 的临时问题，不该让已经成功的 arm64 产物连带丢失
+        continue-on-error: true
         run: sudo softwareupdate --install-rosetta --agree-to-license
 
       - name: 打包 x64 (Intel)
@@ -110,7 +132,20 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: npx electron-builder --mac --x64 dmg zip
+        run: |
+          mkdir -p release
+          npx electron-builder --mac --x64 dmg zip 2>&1 | tee build-x64.log
+
+      # Actions 的运行日志必须登录才能下载，失败时把 tee 下来的完整日志传上来，
+      # 排错时不必再去找人要。
+      - name: 失败时上传构建日志
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build-*.log
+          if-no-files-found: warn
+          retention-days: 30
 
       - name: 上传产物
         uses: actions/upload-artifact@v4
