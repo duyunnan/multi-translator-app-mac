@@ -116,6 +116,9 @@ jobs:
         # tee 保存完整日志：Actions 的运行日志需要登录才能下载，
         # 失败时把它作为 artifact 传上来，便于直接排错
         run: |
+          # 必须 pipefail：管道里退出码取的是最后一个命令（tee 恒为 0），
+          # 不加的话 electron-builder 失败会被伪装成成功，一路走到上传产物才暴露
+          set -o pipefail
           mkdir -p release
           npx electron-builder --mac --arm64 dmg zip 2>&1 | tee build-arm64.log
 
@@ -133,28 +136,21 @@ jobs:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
+          set -o pipefail
           mkdir -p release
           npx electron-builder --mac --x64 dmg zip 2>&1 | tee build-x64.log
 
-      # Actions 的运行日志必须登录才能下载，失败时把 tee 下来的完整日志传上来，
-      # 排错时不必再去找人要。
-      - name: 失败时上传构建日志
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-log
-          path: build-*.log
-          if-no-files-found: warn
-          retention-days: 30
-
+      # always + warn：dmg 失败时 zip 往往已经生成，别让它跟着一起丢（zip 解压后
+      # 拖进 /Applications 同样能装）。job 仍会因打包那步失败而标红。
       - name: 上传产物
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mac-dmg
           path: |
             release/*.dmg
             release/*.zip
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 30
 
       - name: 附带到 Release
@@ -164,3 +160,27 @@ jobs:
           files: |
             release/*.dmg
             release/*.zip
+
+      # 无论成败都输出诊断，并把构建日志尾部直接打进 Actions 输出——
+      # Actions 的运行日志要登录才能下载，这样在网页上就能直接看到失败原因。
+      - name: 诊断输出
+        if: always()
+        run: |
+          echo "=== release/ 目录 ==="
+          ls -la release/ 2>/dev/null || echo "(release 不存在或为空)"
+          echo ""
+          echo "=== 构建日志尾部（各 80 行）==="
+          for f in build-*.log; do
+            [ -f "$f" ] || continue
+            echo "---------- $f ----------"
+            tail -n 80 "$f"
+          done
+
+      - name: 上传构建日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build-*.log
+          if-no-files-found: warn
+          retention-days: 30
