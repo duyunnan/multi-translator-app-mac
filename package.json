@@ -17,7 +17,9 @@
     "dist:mac:arm64": "npm run build && electron-builder --mac --arm64 dmg zip"
   },
   "overrides": {
-    "@noble/hashes": "1.4.0"
+    "pkijs": {
+      "@noble/hashes": "1.4.0"
+    }
   },
   "build": {
     "appId": "com.multitranslator.app",
