@@ -325,7 +325,7 @@ Signal 子进程的每个 webContents
 主路径的**废弃实现**，仅在删除账号时兜底清理遗留子进程；mac 上它不做窗口嵌入。
 
 > 更新后台适配：客户端按平台上报 `platform=windows` / `macos` / `linux`，
-> mac 平台请返回 **zip** 包（`electron-builder --mac zip` 的那一版，内含 `.app`），
+> mac 平台请返回 **zip** 包（`release/` 里 mac 架构那一版，内含 `.app`，非 dmg），
 > 本地缓存文件名形如 `cyht-mac-arm64-1.1.2.zip`。返回 exe 会被拒绝安装。
 
 ## 数据存储位置

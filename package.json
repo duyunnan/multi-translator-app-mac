@@ -12,9 +12,9 @@
     "start": "electron-vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "dist": "npm run build && electron-builder --win",
-    "dist:mac": "npm run build && electron-builder --mac dmg zip",
-    "dist:mac:x64": "npm run build && electron-builder --mac --x64 dmg zip",
-    "dist:mac:arm64": "npm run build && electron-builder --mac --arm64 dmg zip"
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:mac:x64": "npm run build && electron-builder --mac --x64",
+    "dist:mac:arm64": "npm run build && electron-builder --mac --arm64"
   },
   "overrides": {
     "pkijs": {

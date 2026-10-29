@@ -76,8 +76,12 @@ for arch in "${ARCHS[@]}"; do
   fi
 
   # 4) 打包 dmg + zip
+  #
+  # 注意：不要在命令行里写 "dmg zip"。--mac 是数组选项，target 必须紧跟其后，
+  # 一旦中间插了 --arm64/--x64 就会断开收集，electron-builder 26 会直接报
+  # "Unknown arguments: dmg, zip"。target 交给 package.json 的 build.mac.target。
   echo "==> electron-builder --mac ${FLAG[*]:-}"
-  npx electron-builder --mac ${FLAG[@]+"${FLAG[@]}"} dmg zip
+  npx electron-builder --mac ${FLAG[@]+"${FLAG[@]}"}
 
   echo "==> ${LABEL} 构建完成"
 done

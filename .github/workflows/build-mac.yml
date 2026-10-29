@@ -123,7 +123,7 @@ jobs:
           # 不加的话 electron-builder 失败会被伪装成成功，一路走到上传产物才暴露
           set -o pipefail
           mkdir -p release
-          npx electron-builder --mac --arm64 dmg zip 2>&1 | tee build-arm64.log
+          npx electron-builder --mac --arm64 2>&1 | tee build-arm64.log
 
       - name: 准备 Rosetta（x64 交叉构建用）
         if: github.event.inputs.arch != 'arm64'
@@ -141,7 +141,7 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p release
-          npx electron-builder --mac --x64 dmg zip 2>&1 | tee build-x64.log
+          npx electron-builder --mac --x64 2>&1 | tee build-x64.log
 
       # always + warn：dmg 失败时 zip 往往已经生成，别让它跟着一起丢（zip 解压后
       # 拖进 /Applications 同样能装）。job 仍会因打包那步失败而标红。
