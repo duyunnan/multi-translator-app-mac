@@ -45,16 +45,39 @@ import { getAccount, updateAccountStatus, listAccounts } from './account-manager
  */
 type LineModeLib = typeof import('../line-mode')
 let lineModeCache: LineModeLib | null = null
-function loadLineMode(): LineModeLib {
-  if (!lineModeCache) {
-    // 这里必须用 __dirname 拼接，不能写 '../line-mode'：
-    // 源码里 line-manager.ts 在 services/ 下、相对 src/main 是 ../line-mode；
-    // 但打包后所有代码都被 bundle 进 <out>/main/app.js，与 line-mode.js 同级，
-    // 那条相对路径就变成了 <out>/line-mode（不存在）。Rollup 不会改写 require
-    // 里的路径，所以由我们自己按运行时位置拼。
-    lineModeCache = require(join(__dirname, 'line-mode.js')) as LineModeLib
+let lineModeMissing = false
+
+/**
+ * 候选路径按优先级排列。不要写 '../line-mode'：源码里 line-manager.ts 在
+ * services/ 下，相对 src/main 是 ../line-mode；但打包后所有代码都被 bundle 进
+ * <out>/main/app.js，那条相对路径会变成 <out>/line-mode（不存在）。Rollup 不
+ * 会改写 require 里的路径，所以一律用 __dirname / resourcesPath 现拼。
+ */
+function lineModeCandidates(): string[] {
+  return [
+    join(__dirname, 'line-mode.js'), // asar 内（Windows 打包走这条）
+    // extraResources 的 <=resources>/line-runtime/line-mode.js：独立于 files glob，
+    // macOS 打包出现过 asar 里没收集到该文件的情况，这条是兜底。
+    join(process.resourcesPath || '', 'line-runtime', 'line-mode.js'),
+  ]
+}
+
+function loadLineMode(): LineModeLib | null {
+  if (lineModeCache) return lineModeCache
+  if (lineModeMissing) return null
+  for (const c of lineModeCandidates()) {
+    try {
+      if (existsSync(c)) {
+        lineModeCache = require(c) as LineModeLib
+        return lineModeCache
+      }
+    } catch {
+      /* 换下一个候选 */
+    }
   }
-  return lineModeCache
+  lineModeMissing = true
+  llog(`[line] line-mode 未找到（shim 相关功能降级）候选=${lineModeCandidates().join(' | ')}`)
+  return null
 }
 
 /** 主进程 -> 渲染层 状态推送通道 */
@@ -262,16 +285,20 @@ async function ensureExtensionLoaded(accountId: string): Promise<string | null> 
   try {
     const ses = session.fromPartition(partition)
     const ext = await ses.loadExtension(extDir, { allowFileAccess: true })
-    // shim 注入是文件级的（幂等），首次即可；必须在 loadURL 前完成
-    const lineMode = loadLineMode()
-    lineMode.ensureLineIndexShim(extDir, ext.id)
-    // 打包后若安装目录只读，shim 注入会静默失败 → 页面白屏；这里落盘确认
-    const mainJs = join(extDir, 'static', 'js', 'main.js')
+    // shim 注入是文件级的（幂等），首次即可；必须在 loadURL 前完成。
+    // 整体容错：line-mode 取不到、或注入失败，绝不能让扩展加载失败 ——
+    // 否则整个 LINE 直接不可用。宁可少一层 shim 也要让页面起来。
     let shimOk = false
     try {
-      shimOk = readFileSync(mainJs, 'utf8').includes(lineMode.LINE_SHIM_MARK)
-    } catch {
-      /* ignore */
+      const lineMode = loadLineMode()
+      if (lineMode) {
+        lineMode.ensureLineIndexShim(extDir, ext.id)
+        // 打包后若安装目录只读，shim 注入会静默失败 → 页面白屏；这里落盘确认
+        const mainJs = join(extDir, 'static', 'js', 'main.js')
+        shimOk = readFileSync(mainJs, 'utf8').includes(lineMode.LINE_SHIM_MARK)
+      }
+    } catch (e) {
+      llog(`[line] shim 注入失败（扩展仍会加载）: ${(e as Error)?.message}`)
     }
     llog(`[line] extension loaded partition=${partition} id=${ext.id} v=${ext.version} shim=${shimOk}`)
     console.log(`[line] extension loaded partition=${partition} id=${ext.id} v=${ext.version}`)
@@ -329,7 +356,9 @@ function broadcast(accountId: string): void {
  * 使已注入的译文徽章立即切换颜色（保存译文显示设置后调用）。
  */
 export function pushLineBadgeStyle(): void {
-  const styleCode = loadLineMode().badgeStyleCode()
+  const lineMode = loadLineMode()
+  if (!lineMode) return
+  const styleCode = lineMode.badgeStyleCode()
   if (!styleCode) return
   for (const entry of entries.values()) {
     const wc = entry.view?.webContents
@@ -378,13 +407,18 @@ function createView(accountId: string): WebContentsView {
   wc.on('console-message', onWcConsole as never)
 
   // 注入 CLEANUP_JS（发送翻译 / 消息翻译 / 未读统计）+ 未读轮询回调
-  loadLineMode().attachLinePage(wc, {
-    forcePoll: true,
-    onUnread: (n) => {
-      if (entry.viewGone) return
-      patchState(accountId, { unread: n })
-    },
-  })
+  const pageLineMode = loadLineMode()
+  if (pageLineMode) {
+    pageLineMode.attachLinePage(wc, {
+      forcePoll: true,
+      onUnread: (n) => {
+        if (entry.viewGone) return
+        patchState(accountId, { unread: n })
+      },
+    })
+  } else {
+    llog('[line] line-mode 缺失，跳过翻译/未读注入（页面仍会加载）')
+  }
 
   wc.on('did-fail-load', (_e, code, desc, url) => {
     if (entry.viewGone) return
