@@ -179,6 +179,36 @@ jobs:
             tail -n 80 "$f"
           done
 
+          # 列出打包产物里 app.asar 的真实文件清单：asar 的文件索引就存在包头的
+          # JSON 里，直接解析即可，无需额外依赖。用来确认 out/main/* 有没有被收集进包。
+          echo ""
+          echo "=== 产物 app.asar 内 out/main 清单 ==="
+          for appdir in release/mac*/*.app release/mac/*.app; do
+            [ -d "$appdir" ] || continue
+            echo "---------- $appdir ----------"
+            node -e '
+              const fs = require("fs");
+              const p = process.argv[1] + "/Contents/Resources/app.asar";
+              if (!fs.existsSync(p)) { console.log("  (无 app.asar)"); process.exit(0); }
+              const fd = fs.openSync(p, "r");
+              const b = Buffer.alloc(16);
+              fs.readSync(fd, b, 0, 16, 0);
+              const jsonSize = b.readUInt32LE(12);
+              const j = Buffer.alloc(jsonSize);
+              fs.readSync(fd, j, 0, jsonSize, 16);
+              fs.closeSync(fd);
+              const header = JSON.parse(j.toString("utf8"));
+              const all = [];
+              (function walk(n, pre) {
+                for (const [k, v] of Object.entries(n.files || {})) {
+                  const f = pre ? pre + "/" + k : k;
+                  if (v.files) walk(v, f); else all.push(f);
+                }
+              })(header, "");
+              all.filter((f) => f.startsWith("out/main/")).forEach((f) => console.log("  " + f));
+            ' "$appdir" || true
+          done
+
       - name: 上传构建日志
         if: always()
         uses: actions/upload-artifact@v4

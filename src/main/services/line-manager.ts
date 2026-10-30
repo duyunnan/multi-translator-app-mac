@@ -29,7 +29,33 @@ import {
 import type { SignalStatus } from '../../shared/types'
 import type { WebContents as ElectronWebContents } from 'electron'
 import { getAccount, updateAccountStatus, listAccounts } from './account-manager'
-import { ensureLineIndexShim, attachLinePage, badgeStyleCode, LINE_SHIM_MARK } from '../line-mode'
+
+/**
+ * line-mode 的按需加载句柄。
+ *
+ * line-mode.ts 身兼两职：既是 electron.vite.config.ts 里独立的子进程入口
+ * （`electron.exe <...>/line-mode.js` 拉起的 LINE 子进程），又被宿主主进程
+ * 复用它的 shim / 注入工具。
+ *
+ * 若在这里静态 import，Rollup 会把 line-mode.js 变成 app.js 的**顶层依赖**，
+ * 主进程一启动就必须加载到它。打包环节只要有一点偏差（文件没进 asar），
+ * 整个 App 就会在启动阶段崩掉，连其它平台都用不了。
+ *
+ * 改为运行时按需 require：LINE 未使用时完全不加载，出问题也只降级 LINE 功能。
+ */
+type LineModeLib = typeof import('../line-mode')
+let lineModeCache: LineModeLib | null = null
+function loadLineMode(): LineModeLib {
+  if (!lineModeCache) {
+    // 这里必须用 __dirname 拼接，不能写 '../line-mode'：
+    // 源码里 line-manager.ts 在 services/ 下、相对 src/main 是 ../line-mode；
+    // 但打包后所有代码都被 bundle 进 <out>/main/app.js，与 line-mode.js 同级，
+    // 那条相对路径就变成了 <out>/line-mode（不存在）。Rollup 不会改写 require
+    // 里的路径，所以由我们自己按运行时位置拼。
+    lineModeCache = require(join(__dirname, 'line-mode.js')) as LineModeLib
+  }
+  return lineModeCache
+}
 
 /** 主进程 -> 渲染层 状态推送通道 */
 export const LINE_STATE_CHANNEL = 'line:state'
@@ -237,12 +263,13 @@ async function ensureExtensionLoaded(accountId: string): Promise<string | null> 
     const ses = session.fromPartition(partition)
     const ext = await ses.loadExtension(extDir, { allowFileAccess: true })
     // shim 注入是文件级的（幂等），首次即可；必须在 loadURL 前完成
-    ensureLineIndexShim(extDir, ext.id)
+    const lineMode = loadLineMode()
+    lineMode.ensureLineIndexShim(extDir, ext.id)
     // 打包后若安装目录只读，shim 注入会静默失败 → 页面白屏；这里落盘确认
     const mainJs = join(extDir, 'static', 'js', 'main.js')
     let shimOk = false
     try {
-      shimOk = readFileSync(mainJs, 'utf8').includes(LINE_SHIM_MARK)
+      shimOk = readFileSync(mainJs, 'utf8').includes(lineMode.LINE_SHIM_MARK)
     } catch {
       /* ignore */
     }
@@ -302,7 +329,7 @@ function broadcast(accountId: string): void {
  * 使已注入的译文徽章立即切换颜色（保存译文显示设置后调用）。
  */
 export function pushLineBadgeStyle(): void {
-  const styleCode = badgeStyleCode()
+  const styleCode = loadLineMode().badgeStyleCode()
   if (!styleCode) return
   for (const entry of entries.values()) {
     const wc = entry.view?.webContents
@@ -351,7 +378,7 @@ function createView(accountId: string): WebContentsView {
   wc.on('console-message', onWcConsole as never)
 
   // 注入 CLEANUP_JS（发送翻译 / 消息翻译 / 未读统计）+ 未读轮询回调
-  attachLinePage(wc, {
+  loadLineMode().attachLinePage(wc, {
     forcePoll: true,
     onUnread: (n) => {
       if (entry.viewGone) return
